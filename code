@@ -28,3 +28,60 @@ calls_by_issue = pd.read_sql(query, engine)
 # Graph the number of calls for each housing issue
 calls_by_issue.plot.barh(x="complaint_type")
 plt.show()
+
+# Query to get hpd311calls and precipitation values
+query = """
+SELECT hpd311calls.*, weather.prcp
+  FROM hpd311calls
+  JOIN weather
+    ON hpd311calls.created_date = weather.date;"""
+
+# Load query results into the leak_calls data frame
+leak_calls = pd.read_sql(query, engine)
+
+# View the data frame
+print(leak_calls.head())
+
+# Load the JSON with orient specified
+    df = pd.read_json("dhs_report_reformatted.json",
+                      orient='split')
+    
+    # Plot total population in shelters over time
+    df["date_of_census"] = pd.to_datetime(df["date_of_census"])
+    df.plot(x="date_of_census", 
+            y="total_individuals_in_shelter")
+    plt.show()
+    
+except ValueError:
+    print("pandas could not parse the JSON.")
+    
+    api_url = "https://api.yelp.com/v3/businesses/search"
+
+# Get data about NYC cafes from the Yelp API
+response = requests.get(api_url, 
+                        headers=headers, 
+                        params=params)
+
+# Extract JSON data from the response
+data = response.json()
+
+# Load data to a data frame
+cafes = pd.DataFrame(data["businesses"])
+
+# View the data's dtypes
+print(cafes.dtypes)
+
+#NESTED
+
+# Load json_normalize()
+from pandas.io.json import json_normalize
+
+# Isolate the JSON data from the API response
+data = response.json()
+
+# Flatten business data into a data frame, replace separator
+cafes = json_normalize(data["businesses"],
+                       sep="_")
+
+# View data
+print(cafes.head())
